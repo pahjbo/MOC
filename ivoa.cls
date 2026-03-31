@@ -7,15 +7,19 @@
 \RequirePackage{graphicx}
 \RequirePackage{xcolor}
 \RequirePackage{ifthen}
-\RequirePackage{doc}
+\RequirePackage{listings}
+\RequirePackage{textcomp}
 \RequirePackage{paralist}
 \RequirePackage{url}
+\RequirePackage[nottoc]{tocbibind}
 \RequirePackage[labelfont=it]{caption}
 \RequirePackage[T1]{fontenc}
 \RequirePackage[utf8]{inputenc}
 
 \definecolor{ivoacolor}{rgb}{0.0,0.318,0.612}
 \definecolor{linkcolor}{rgb}{0.318,0,0.318}
+\definecolor{termcolor}{rgb}{0.6,0.1,0.1}
+
 
 \RequirePackage[colorlinks,
 	linkcolor=linkcolor,
@@ -26,6 +30,12 @@
 
 \RequirePackage{natbib}
 \bibliographystyle{ivoatex/ivoa}
+
+% people usually want to cut and paste from our listings, so keep
+% lstlistings from mangling quotes.
+\lstset{upquote=true}
+
+\urlstyle{same}
 
 \renewcommand{\topfraction}{0.9}
 \renewcommand{\bottomfraction}{0.7}
@@ -38,7 +48,12 @@
 
 %%%%%%%%%%%%%%%%%%% Metadata definition macros
 
-\newcommand{\ivoagroup}[1]{\def\ivo@group{#1}}
+\newcommand{\ivoagroup}[2][WG]{%
+	\def\ivo@group{#2}%
+	\ifthenelse{\equal{#1}{IG}}
+		{\gdef\gr@uptype{Interest Group}}
+		{\gdef\gr@uptype{Working Group}}
+}
 
 % these are accumulators for sequences
 \def\previ@usversions{}
@@ -125,43 +140,43 @@
     \Large\color{ivoacolor}\quad\textsl{\textsf{\textbf{V}irtual}} \\
     \Large\color{ivoacolor}\quad\textsl{\textsf{\textbf{O}bservatory}} \\
     \Large\color{ivoacolor}\textsl{\textsf{\textbf{A}lliance}}}}\hfil}
- 
+
  	\vskip 1.4cm
  	\begin{sloppypar}\raggedright
   \LARGE\color{ivoacolor}\sffamily\bfseries \@title\par
   \end{sloppypar}
 
 	\bigskip
-  \noindent{\LARGE\color{ivoacolor}\sffamily\bfseries 
+  \noindent{\LARGE\color{ivoacolor}\sffamily\bfseries
   	Version \ivoaDocversion}
 	\medskip
   \titlehe@d{\expandedDoctype{\ivoaDoctype} \ivoaDocdate}%
 
 
   \begin{bigdescription}
-    \item[Working group]
+    \item[\gr@uptype]
     	\ivo@group
 
     \item[This version]
-    	\currentDocURL
+    	\currentDocRef
 
     \item[Latest version]
-    	\latestDocURL
+    	\latestDocRef
 
     \item[Previous versions]
-			\begin{compactenum}[]
+			\begin{compactitem}[]
 				\previ@usversions
-			\end{compactenum}
+			\end{compactitem}
 
     \item[Author(s)]
-    	\begin{compactenum}[]
+    	\begin{compactitem}[]
       	\@uthors
-    	\end{compactenum}
+    	\end{compactitem}
 
     \item[Editor(s)]
-        \begin{compactenum}[]
+        \begin{compactitem}[]
     	\@ditors
-        \end{compactenum}
+        \end{compactitem}
 
     \ifthenelse{\equal{\vcsR@vision}{unknown}}{\relax}{
     	\item[Version Control]
@@ -188,7 +203,7 @@
     \@endparpenalty\@M}
     {\par
     \bigskip
-    \titlehe@d{Status of This Document}
+    \titlehe@d{Status of this document}
 
    	\medskip
    	\docstatusDeclaration{\ivoaDoctype}
@@ -207,9 +222,11 @@
 			{IVOA Proposed Recommendation}
 		{\ifthenelse{\equal{#1}{REC}}
 			{IVOA Recommendation}
-		{\ifthenelse{\equal{#1}{DERR}}
-			{Draft Erratum}
-		{UNKNOWN DOCUMENT (fix DOCTYPE)}}}}}}
+		{\ifthenelse{\equal{#1}{PEN}}
+			{Proposed Endorsed Note}
+		{\ifthenelse{\equal{#1}{EN}}
+			{Endorsed Note}
+		{UNKNOWN DOCUMENT (fix DOCTYPE)}}}}}}}
 
 \newcommand\docstatusDeclaration[1]
 	{\ifthenelse{\equal{#1}{NOTE}}
@@ -232,12 +249,19 @@
       only as a recommended standard that is under review and
       which may be changed before it is accepted as a full
       Recommendation.}
- 	{\ifthenelse{\equal{#1}{DERR}}
- 		{This is a draft for an erratum to an IVOA recommendation made 
- 			available for public review.  Interested parties are invited
- 			to evaluate the erratum's validity and impact, but at this stage
- 			the erratum does not yet change the normative content of the
- 			recommendation.}
+ 	{\ifthenelse{\equal{#1}{PEN}}
+ 		{This is an IVOA Proposed Endorsed Note for review by IVOA
+      members and other interested parties. It is appropriate to
+      reference this document only as a Proposed Endorsed Note that
+      is under review and may change before it is endorsed or may
+      not be endorsed.
+ 		}
+ 	{\ifthenelse{\equal{#1}{EN}}
+ 		{This document is an IVOA Endorsed Note. It has been reviewed  and endorsed
+ 			by the IVOA Technical Coordination Group as a stable, citable document
+ 			which constitutes valuable information for the IVOA community and
+ 			beyond.
+ 		}
 	{\ifthenelse{\equal{#1}{REC}}
 		{This document has been reviewed by IVOA Members and other
      interested parties, and has been endorsed by the IVOA
@@ -248,19 +272,20 @@
      attention to the specification and to promote its
      widespread deployment. This enhances the functionality and
      interoperability inside the Astronomical Community.}
-		{UNKNOWN DOCUMENT (fix DOCTYPE)}}}}}\par
+		{UNKNOWN DOCUMENT TYPE (fix DOCTYPE)}}}}}}\par
 	A list of current IVOA Recommendations and other technical documents
-	can be found at \href{http://www.ivoa.net/Documents/
-	}{http://www.ivoa.net/Documents/}.}
+	can be found in the IVOA document
+	repository\footnotemark\footnotetext{\url{https://www.ivoa.net/documents/}}.}
 
-
-\newcommand\currentDocURL % URL of this document's landing page
-	{\href{http://www.ivoa.net/documents/\ivoaDocname/\ivoaDocdatecode}
-		{http://www.ivoa.net/documents/\ivoaDocname/\ivoaDocdatecode}}
-\newcommand\latestDocURL 
-	% URL of a potential successor to the document's landing page
-	{\href{http://www.ivoa.net/documents/\ivoaDocname}
-		{http://www.ivoa.net/documents/\ivoaDocname}}
+% legacy definition when ivoatexmeta.tex does not yet define it
+\newcommand{\ivoaBaseURL}{https://www.ivoa.net/documents/\ivoaDocname}
+\newcommand\currentDocURL %
+	{\ivoaBaseURL/\ivoaDocdatecode}
+\newcommand\currentDocRef % formatted reference to this document's landing page
+	{\href{\currentDocURL}{\currentDocURL}}
+\newcommand\latestDocRef
+	% formatted reference to a potential successor to the document's landing page
+	{\href{\ivoaBaseURL}{\ivoaBaseURL}}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Styling various item
@@ -294,7 +319,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Various utilities for writing IVOA docs
 
 \newenvironment{admonition}[1]{ % a simple admonition box
-  \begin{table} %% TBD: use a different sort of insertion env?
+  \begin{table}[ht] %% TBD: use a different sort of insertion env?
   \hskip -0.75cm
   \begin{minipage}[r]{0.75\columnwidth}%
   {\color{lightgray}\hrule}
@@ -316,7 +341,8 @@
   }%
 
 
-\newenvironment{inlinetable}{\vskip 1ex\vfil\penalty8000\vfilneg%
+\newenvironment{inlinetable}{\vskip 1.5ex plus 0.5ex minus 0.5ex
+		\vfil\penalty8000\vfilneg%
     \hbox to\hsize\bgroup\hss}
   {\hss\egroup\vspace{8pt}}
 
@@ -325,18 +351,48 @@
 
 \newcommand{\xmlel}[1]{{\ttfamily\itshape #1}}
 \newcommand{\vorent}[1]{\textsc{#1}}
+\def\ucd{\st@rtucd\re@lucd}
+\def\re@lucd#1{\sl#1\@nducd}
+\begingroup
+% let LaTeX break UCD componds and at dots and semicolons in UCDs
+\gdef\bre@kabledot{.\hskip0pt}
+\gdef\bre@kablesemicolon{;\hskip0pt}
+\catcode`\.=\active\catcode`\;=\active
+\gdef\st@rtucd{\begingroup
+  \catcode`\.=\active\let.=\bre@kabledot
+  \catcode`\;=\active\let;=\bre@kablesemicolon}
+\gdef\@nducd{\endgroup}
+\endgroup
+\def\vocterm{\startvocterm\realvocterm}
+\def\realvocterm#1{\emph{\color{termcolor}#1}\endvocterm}
+\begingroup
+\gdef\breakablecolon{:\hskip0pt}
+\catcode`\:=\active
+\gdef\startvocterm{\begingroup
+  \catcode`\:=\active\let:=\breakablecolon}
+\gdef\endvocterm{\endgroup}
+\endgroup
 
 \newcommand{\sptablerule}{\noalign{\vspace{2pt}}\hline\noalign{\vspace{2pt}}}
 
 \newcommand{\ivoatex}{\mbox{\textsc{Ivoa}\TeX}}
 
+\newcommand{\auxiliaryurl}[1]{\href{\currentDocURL/#1}{\currentDocURL/#1}}
+
 \chardef\dquote'042
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Changing LaTeX defaults
+\newcommand{\tikzfigure}[1]{\input{#1.tikz.tex}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Changing LaTeX/package defaults
 
 \renewcommand*\descriptionlabel[1]
 	{\hspace{\labelsep}\itshape #1}
 
+\lst@CCPutMacro
+    \lst@ProcessOther {"2D}{\lst@ttfamily{-{}}{-}}
+    \@empty\z@\@empty
+
 \makeatother
 
+\input aas_macros.tex
 \input ivoatexmeta.tex
